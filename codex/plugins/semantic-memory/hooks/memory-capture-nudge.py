@@ -11,9 +11,10 @@ from common import debug
 def main() -> int:
     debug("Stop semantic-memory capture nudge")
     print(
-        "Semantic memory reminder: before ending substantial work or losing context, persist durable, "
-        "verified facts with sm_add_fact after sm_search/sm_list_facts dedupe. Store decisions, stable "
-        "project/config facts, and corrections; do not store secrets, guesses, raw logs, or ephemeral conversation.",
+        "Semantic memory reminder: Codex may append only compact, verified, active-repository coding facts "
+        "to that repository's collision-safe namespace after scoped dedupe and current source/test evidence. "
+        "Do not write architecture guesses or broad decisions; return those as memory_candidates for controller review. "
+        "Never write personal/global memory, secrets, logs, TODOs, session state, or mutate/supersede/delete/govern memory.",
         file=sys.stderr,
     )
     return 0

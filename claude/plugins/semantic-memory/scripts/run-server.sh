@@ -3,6 +3,10 @@
 # the warm HTTP endpoint when SEMANTIC_MEMORY_HTTP_PORT is non-empty/non-zero.
 set -uo pipefail
 
+if [ -n "${SEMANTIC_MEMORY_RELAY_PORT:-}" ]; then
+  exec python3 /home/sikmindz/Coding/Libraries/semantic-memory-mcp/scripts/semantic-memory-mcp-relay.py --port "$SEMANTIC_MEMORY_RELAY_PORT"
+fi
+
 SM_BIN="${SEMANTIC_MEMORY_MCP_BIN:-}"
 [ -z "$SM_BIN" ] && [ -x "$HOME/Coding/Libraries/semantic-memory-mcp/target/release/semantic-memory-mcp" ] && SM_BIN="$HOME/Coding/Libraries/semantic-memory-mcp/target/release/semantic-memory-mcp"
 [ -z "$SM_BIN" ] && [ -x "$HOME/.local/bin/semantic-memory-mcp" ] && SM_BIN="$HOME/.local/bin/semantic-memory-mcp"
