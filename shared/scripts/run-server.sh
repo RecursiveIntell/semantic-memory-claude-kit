@@ -30,6 +30,10 @@ case "$HELP" in *"--llm-model"*) [ -n "$SM_LLM_MODEL" ] && EXTRA_ARGS+=(--llm-mo
 if [ "$SM_TURBO_QUANT" = "1" ] || [ "$SM_TURBO_QUANT" = "true" ]; then
   case "$HELP" in *"--turbo-quant"*) EXTRA_ARGS+=(--turbo-quant) ;; esac
 fi
+SM_AUTH_TOKEN_FILE="${SEMANTIC_MEMORY_OPERATOR_AUTHORITY_TOKEN_FILE:-}"
+if [ -n "$SM_AUTH_TOKEN_FILE" ]; then
+  case "$HELP" in *"--operator-authority-token-file"*) EXTRA_ARGS+=(--operator-authority-token-file "$SM_AUTH_TOKEN_FILE") ;; esac
+fi
 
 if [ -n "$SM_EMBEDDER" ]; then
   exec "$SM_BIN" --memory-dir "$SM_DIR" --embedder "$SM_EMBEDDER" "${EXTRA_ARGS[@]}" "$@"

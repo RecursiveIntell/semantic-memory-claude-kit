@@ -129,6 +129,7 @@ def rpc_tools_list(binary: Path) -> bool:
                     "sm_get_fact",
                     "sm_list_namespaces",
                     "sm_stats",
+                    "sm_add_fact",
                 },
                 "full": {"sm_search_witnessed", "sm_add_fact", "sm_search", "sm_stats"},
             }

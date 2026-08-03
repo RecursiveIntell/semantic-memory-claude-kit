@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +51,42 @@ class DoctorTruthFloorTests(unittest.TestCase):
             with mock.patch.object(module, "ROOT", root):
                 module.hook_manifest_paths("hermes")
             self.assertTrue(any(row["status"] == "OK" and "1 hook" in row["detail"] for row in module.RESULTS))
+    def test_agent_profile_rejects_surface_missing_governed_fact_capture(self) -> None:
+        tool_response = {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "result": {
+                "tools": [
+                    {"name": "sm_search_witnessed"},
+                    {"name": "sm_replay_search"},
+                    {"name": "sm_decide_assertion_authority"},
+                    {"name": "sm_decide_action_authority"},
+                    {"name": "sm_get_fact"},
+                    {"name": "sm_list_namespaces"},
+                    {"name": "sm_stats"},
+                ]
+            },
+        }
+        with (
+            mock.patch.dict(os.environ, {"SEMANTIC_MEMORY_TOOL_PROFILE": "agent"}),
+            mock.patch.object(module, "binary_help", return_value="--tool-profile"),
+            mock.patch.object(
+                module.subprocess,
+                "run",
+                return_value=SimpleNamespace(
+                    returncode=0,
+                    stdout=json.dumps(tool_response) + "\n",
+                    stderr="",
+                ),
+            ),
+        ):
+            self.assertFalse(module.rpc_tools_list(Path("/tmp/semantic-memory-mcp")))
+        self.assertTrue(
+            any(
+                row["status"] == "FAIL" and "sm_add_fact" in row["detail"]
+                for row in module.RESULTS
+            )
+        )
 
 
 if __name__ == "__main__":
