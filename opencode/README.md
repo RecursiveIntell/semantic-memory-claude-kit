@@ -1,5 +1,9 @@
 # semantic-memory for OpenCode
 
+> September 2026: read the [current stack and upgrade guide](../docs/CURRENT_STACK.md)
+> for revision-pinned sources, explicit settings, governed-memory behavior and
+> unverified native/HTTP integration gates before using older examples below.
+
 > **Tier 1 host plugin.** MCP-only integration; rule/context injection for behavioral guidance.
 
 [![Tier 1](https://img.shields.io/badge/tier-1-blueviolet?style=for-the-badge)](#capability-boundary)

@@ -50,18 +50,19 @@ class TestClaimLedgerIntegration(unittest.TestCase):
         )
         self.assertIn("--write-claim-ledger", result.stdout)
 
-    def test_context_governor_audit_has_write_claim_ledger(self) -> None:
-        """context-governor-audit.py should have --write-claim-ledger flag."""
+    def test_context_governor_audit_rejects_unimplemented_write_flag(self) -> None:
+        """An unimplemented flag must not promise a durable ledger write."""
         script = os.path.join(
             os.path.dirname(__file__), "..", "shared", "scripts", "context-governor-audit.py"
         )
         result = subprocess.run(
-            [sys.executable, script, "--help"],
+            [sys.executable, script, "--write-claim-ledger", "select-route", "--query", "test"],
             capture_output=True,
             text=True,
             timeout=10,
         )
-        self.assertIn("--write-claim-ledger", result.stdout)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unrecognized arguments", result.stderr)
 
     def test_benchmark_recall_has_write_claim_ledger(self) -> None:
         """benchmark-recall.py should have --write-claim-ledger flag."""

@@ -1,0 +1,17 @@
+{
+  "stage": "audit@post",
+  "status": "failed",
+  "next_gate": "bounded-follow-up-repair",
+  "finding_ids": [
+    "AMK-01",
+    "AMK-02"
+  ],
+  "evidence": "Independent process-boundary fixtures: Hermes and doctor omit selected settings; 35 targeted tests passed",
+  "remaining_delta": [
+    "Hermes canonical launcher integration",
+    "Doctor canonical launcher integration"
+  ],
+  "coverage_limits": [
+    "No native binary build, real host, device or benchmark proof"
+  ]
+}

@@ -23,7 +23,7 @@ INSTALL = {
             },
             "tool_profile": {
                 "type": "string",
-                "enum": ["lean", "standard", "agent", "full"],
+                "enum": ["stable", "lean", "standard", "agent", "full"],
                 "description": "Runtime MCP tool profile (default: agent).",
             },
         },

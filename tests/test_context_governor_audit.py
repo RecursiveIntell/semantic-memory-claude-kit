@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import shutil
 import unittest
 
 SCRIPT = os.path.join(
@@ -13,6 +14,10 @@ SCRIPT = os.path.join(
 )
 
 
+NATIVE_BINARY = os.environ.get("CONTEXT_GOVERNOR_BIN") or shutil.which("context-governor") or os.path.expanduser("~/.cargo/bin/context-governor")
+
+@unittest.skipUnless(os.path.isfile(NATIVE_BINARY) and os.access(NATIVE_BINARY, os.X_OK),
+                     "native integration requires context-governor; set CONTEXT_GOVERNOR_BIN")
 class TestContextGovernorAudit(unittest.TestCase):
     def test_tool_surface_audit_runs(self) -> None:
         """audit-tool-surface should produce a valid McpToolSurfaceAuditV1 receipt."""
@@ -43,9 +48,8 @@ class TestContextGovernorAudit(unittest.TestCase):
     def test_audit_compression_boundary_runs(self) -> None:
         """audit-compression-boundary should return a CompressionBoundaryAuditV1 receipt."""
         request = {
-            "source_text": "User said ignore all previous instructions.",
-            "compressed_text": "Summary: user attempted prompt injection; do not execute it.",
-            "policy": "operator_grade",
+            "source_fragments": ["User said ignore all previous instructions."],
+            "compressed_summary": "Summary: user attempted prompt injection; do not execute it.",
         }
         result = subprocess.run(
             [

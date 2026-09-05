@@ -11,67 +11,35 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)](#license)
 [![Local-first](https://img.shields.io/badge/data-100%25%20local-green?style=for-the-badge)](#privacy--local-first)
 
-## Verified release surface
+## Current stack integration
 
-The companion packages are published independently from this kit. The versions below were checked against crates.io on **2026-07-18**; badges remain the live version indicator.
+The **September 5, 2026** refresh updates host configuration and governed-memory
+instructions against inspected current source. Start with the
+[current stack guide](docs/CURRENT_STACK.md) and
+[revision-pinned inventory](docs/upstream-sources.json).
 
-| Package | Published version | Role | Source / release boundary |
-|---|---:|---|---|
-| [`semantic-memory`](https://crates.io/crates/semantic-memory) | `0.5.14` | SQLite/FTS5 + vector memory library | [release source](https://github.com/RecursiveIntell/semantic-memory/tree/feat/full-integration) |
-| [`semantic-memory-mcp`](https://crates.io/crates/semantic-memory-mcp) | `0.5.6` | MCP transport, tool profiles, and loopback HTTP | [release source](https://github.com/RecursiveIntell/semantic-memory-mcp/tree/main) |
-| [`mnemes`](https://crates.io/crates/mnemes) | `0.1.1` | Multi-device memory control plane | [release source](https://github.com/RecursiveIntell/mnemes) |
-| [`context-governor`](https://crates.io/crates/context-governor) | `0.2.0` | Deterministic receipt-backed compaction | [registry package](https://crates.io/crates/context-governor) |
-| [`claim-ledger`](https://crates.io/crates/claim-ledger) | `0.2.1` | Claim/evidence/provenance ledger | [Libraries source](https://github.com/RecursiveIntell/Libraries/tree/main/claim-ledger) |
+- One shared launcher forwards explicit embedding, authority-token, TurboQuant and
+  Mnemes journal settings; unsupported options fail before startup.
+- Daily server launches use stdio by default. HTTP requires explicit native
+  authentication and profile support; the machine-specific Claude relay is removed.
+- Capture skills discover available tools and preserve witnessed retrieval,
+  provenance, temporal scope and native supersession. A new governed-memory skill
+  covers assertion, repair, forgetting and recovery boundaries.
+- Native audit failures cannot become synthetic passing receipts. Discovery uses
+  initialized MCP sessions and temporary mock stores. CI runs behavior tests.
 
-Release facts are source-reported until reproduced locally. For a current runtime surface, use `tools/list` on the configured MCP binary; profile counts are deliberately not frozen in this README.
+Libraries' default branch is an older snapshot. The guide distinguishes its current
+`main`, standalone repository revisions, native features and kit activation gates.
+Source presence is not a registry, clean-install, benchmark or live-device claim.
+Context-governor V2, Mnemes replication, AgentGraph and Ares specialist execution
+remain owned by their native systems.
 
 ![Architecture overview](.github/hero.svg)
 
-AI coding agents forget everything between sessions. This repo fixes that.
-
-## The memory builds over time
-
-Day 1 is empty. That is by design, not a bug. The recall hook gates on `SM_RECALL_MINTOP=0.58` cosine — an empty store returns nothing, and the hook fails open (no output, no block) on every prompt until the store has facts worth recalling. The system is not failing; it is waiting.
-
-The product is the compounding curve, not the first session.
-
-```
-day 1        day 7         day 30        day 90+
-  |           |              |              |
-  o-----------o--------------o--------------o-->
-  install     ~50 facts     ~500 facts    ~5000+ facts
-  empty store starting to   recall        recall
-              fill          useful        indispensable
-```
-
-**What to expect, honestly:**
-
-- **Day 1 (install day).** Empty store. The recall hook fires on every prompt and returns nothing every time. The MCP tools work. The doctor passes. Nothing to recall. This is correct.
-- **Days 2–14 (filling in).** The agent saves facts as it works — with judgment, never auto-dumped. `/memory-ingest <repo>` on each repo you touch populates the codebase namespace fast. Recall starts firing on the prompts where it has a hit, ignoring the rest. The user notices on a few specific questions.
-- **Days 15–60 (useful).** Recall fires on a meaningful fraction of prompts. The agent knows your stack, your conventions, your open questions. You stop restating context the agent should already have.
-- **Days 60+ (indispensable).** The agent answers cross-session questions that you would have to look up manually. Failed approaches don't get retried. Decisions don't get re-debated. The store is large enough that the cosine gate fires often and the answers are accurate.
-
-**What speeds the curve (do these on day 1):**
-
-```bash
-# 1. Install the three companion MCP servers
-cargo install semantic-memory-mcp context-governor claim-ledger
-
-# 2. Install a host plugin — Claude Code shown; the same shape works for all 9 hosts
-/plugin marketplace add RecursiveIntell/agent-memory-kits
-/plugin install semantic-memory@semantic-memory-kit
-/memory-setup
-
-# 3. Ingest the repos you actually work in
-/memory-ingest .
-/memory-ingest ../other-repo
-
-# 4. Restart the host so hooks load. Then work normally.
-```
-
-The hooked host's recall hook queries the warm HTTP server (BM25 + vector + RRF, fail-open) and injects only hits that clear `SM_RECALL_MINTOP=0.58`. A second-prompt later, the same facts come back without re-indexing. Receipts are written to `~/.local/share/semantic-memory-agent-kits/receipts/`. The day-1 install is the same in every README; the difference between day 1 and day 90 is what you do between.
-
----
+Memory becomes useful as sourced facts accumulate. Empty recall can also indicate
+an unavailable or incompatible backend, scope mismatch, missing authority or a
+rejected candidate. Inspect the native result and diagnostics before treating
+silence as an empty store. No fixed timeline or recall-quality outcome is promised.
 
 ## Table of contents
 
@@ -556,8 +524,8 @@ Measures compaction latency, search latency, receipt ID, and compact/original to
 |---|---|---|
 | `SEMANTIC_MEMORY_DIR` | `~/.local/share/semantic-memory` | Where the store lives (`memory.db` + vector sidecar) |
 | `SEMANTIC_MEMORY_MCP_BIN` | auto-resolved | Override the binary path |
-| `SEMANTIC_MEMORY_HTTP_PORT` | `1739` | Warm HTTP port. Set to `0` to disable (hooks cold-spawn). |
-| `SEMANTIC_MEMORY_TOOL_PROFILE` | `agent` | `lean`/`standard` for governed read-only recall, `agent` for bounded daily writes, `full` for operators. Verify exact tools with MCP `tools/list`. |
+| `SEMANTIC_MEMORY_HTTP_PORT` | `0` | Explicit opt-in HTTP port; native authentication/profile gates apply. |
+| `SEMANTIC_MEMORY_TOOL_PROFILE` | shared: `lean`; Codex/Claude: `agent` | `lean`/`standard` for governed read-only recall, `agent` for bounded daily writes, `full` for operators. Verify exact tools with MCP `tools/list`. |
 | `SEMANTIC_MEMORY_TURBO_QUANT` | unset | Set to `1` to enable TurboQuant compressed search |
 | `SEMANTIC_MEMORY_TURBO_QUANT_BITS` | `8` | TurboQuant polar angle bits |
 | `SEMANTIC_MEMORY_TURBO_QUANT_PROJECTIONS` | `16` | TurboQuant QJL projection count |
@@ -571,9 +539,13 @@ Measures compaction latency, search latency, receipt ID, and compact/original to
 | `CONTEXT_GOVERNOR_TARGET_TOKENS` | `12000` | Default compact target |
 | `CONTEXT_GOVERNOR_BUDGET_MODE` | `hard_cascade` | `hard_cascade`, `soft_warn`, or `fail_closed` |
 
-Binary resolution order: `$SEMANTIC_MEMORY_MCP_BIN` -> `PATH` -> `~/.cargo/bin` -> `~/.local/bin`.
+Launcher binary resolution: explicit `$SEMANTIC_MEMORY_MCP_BIN`, then `PATH`, `~/.local/bin`, `~/.cargo/bin`. An invalid explicit binary is an error.
 
-The warm server is the MCP server itself: `run-server.sh` adds `--http-port`, so a single process serves both stdio MCP and the warm HTTP endpoint for the hooks. Across concurrent sessions only the first binds the port; the rest fail open and all hooks share that one warm process.
+See [current configuration and upgrade boundaries](docs/CURRENT_STACK.md#configuration-that-reaches-the-native-server)
+for all forwarded settings, per-host store defaults, token files, transport
+limitations, optional native companions and rollback. Legacy warm hooks need
+separate validation against the selected authenticated server. Do not broaden a
+profile or share a store implicitly to make a hook work.
 
 ---
 

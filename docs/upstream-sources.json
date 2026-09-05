@@ -1,0 +1,90 @@
+{
+  "schema_version": "kit-source-inventory/v1",
+  "observed_date": "2026-09-05",
+  "purpose": "Source evidence, not a dependency lock or release certificate",
+  "sources": [
+    {
+      "repository": "RecursiveIntell/Libraries",
+      "revision": "70e20e6cfb9d96b27deedf18dda473643d82f469",
+      "paths": [
+        "semantic-memory/src/state_epistemics.rs",
+        "semantic-memory/src/evidence_gap.rs",
+        "semantic-memory/src/forgetting.rs",
+        "semantic-memory/src/shadow_policy.rs",
+        "semantic-memory/src/procedural_memory.rs",
+        "semantic-memory/tests/dr05_conformance_pack.rs",
+        "semantic-memory/tests/journal_replication_e2e.rs",
+        "context-governor/src/main.rs",
+        "context-governor/src/lineage.rs",
+        "context-governor/src/key_authority.rs"
+      ],
+      "evidence_state": "source_inspected",
+      "native_validation": "not_run"
+    },
+    {
+      "repository": "RecursiveIntell/semantic-memory-mcp",
+      "revision": "0ac9ca6e0035df7918da0b9a1c97576b8bee29bb",
+      "paths": [
+        "src/main.rs",
+        "src/profile.rs",
+        "src/bridge.rs",
+        "Cargo.toml"
+      ],
+      "evidence_state": "source_inspected",
+      "native_validation": "not_run"
+    },
+    {
+      "repository": "RecursiveIntell/semantic-memory",
+      "revision": "530b70e816030a4114346b8af60118d41d6ed8dd",
+      "paths": [
+        "Cargo.toml"
+      ],
+      "evidence_state": "source_inspected",
+      "native_validation": "not_run"
+    },
+    {
+      "repository": "RecursiveIntell/mnemes",
+      "revision": "908c0c20fd9ad404cdac4c6845094868a5e6b1e9",
+      "paths": [
+        "scripts/mneme-mcp-proxy.py",
+        "scripts/mneme-client.py",
+        "Cargo.toml"
+      ],
+      "evidence_state": "source_inspected",
+      "native_validation": "not_run"
+    },
+    {
+      "repository": "RecursiveIntell/agent-graph-mcp",
+      "revision": "85346a0ba2cce5f82ac30b21c83993c8f0682716",
+      "paths": [
+        "src/main.rs",
+        "src/run_manager.rs",
+        "src/evidence.rs",
+        "src/store.rs",
+        "Cargo.toml"
+      ],
+      "evidence_state": "source_inspected",
+      "native_validation": "not_run"
+    },
+    {
+      "repository": "RecursiveIntell/Ares",
+      "revision": "f84517ffe96dfdb368011358eed6bda1c0c62996",
+      "paths": [
+        "ares_runtime/specialist_routing.py",
+        "ares_runtime/specialist_dispatch.py",
+        "plugins/context_engine/ri-context-governor/__init__.py"
+      ],
+      "evidence_state": "source_inspected_via_github",
+      "native_validation": "not_run"
+    }
+  ],
+  "conflicts": [
+    {
+      "repository": "RecursiveIntell/Libraries",
+      "default_branch": "p32-schema-compat",
+      "default_revision": "011027f77fc7a53c6ecb05300d5c34144370fa3b",
+      "selected_branch": "main",
+      "reason": "September integration is merged on main; default branch remains July snapshot"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "name": "semantic-memory",
-  "version": "0.6.1",
-  "description": "Local-first knowledge base with hybrid search, knowledge graphs, and autonomous memory lifecycle \u2014 for Hermes Agent",
+  "version": "0.8.0",
+  "description": "Local-first semantic-memory integration with discovered tool profiles, governed capture, witnessed recall and native receipt boundaries.",
   "author": "RecursiveIntell",
   "license": "Apache-2.0",
   "hermes": {
@@ -14,7 +14,8 @@
       "release-gate",
       "context-compaction",
       "claim-provenance",
-      "llm-output-parsing"
+      "llm-output-parsing",
+      "governed-memory"
     ],
     "agents": [
       "memory-keeper"

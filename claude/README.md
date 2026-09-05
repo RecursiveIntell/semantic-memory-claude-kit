@@ -1,5 +1,9 @@
 # semantic-memory for Claude Code
 
+> September 2026: read the [current stack and upgrade guide](../docs/CURRENT_STACK.md)
+> for revision-pinned sources, explicit settings, governed-memory behavior and
+> unverified native/HTTP integration gates before using older examples below.
+
 > **Tier 0 reference implementation.** Lifecycle hooks (SessionStart / UserPromptSubmit / PreCompact / Stop), a memory-keeper subagent, capture/curator/maintenance/sync skills, and manifest-declared commands — over `semantic-memory-mcp` (profile-based tool counts, run `generate-tool-surface-docs.py` for current) + `context-governor` (13 CLI commands) + `claim-ledger` (5 tools).
 > Plugin marketplace path: `semantic-memory@semantic-memory-kit`.
 

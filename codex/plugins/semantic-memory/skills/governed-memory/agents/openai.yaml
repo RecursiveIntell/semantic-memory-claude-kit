@@ -1,0 +1,6 @@
+interface:
+  display_name: "Governed Memory"
+  short_description: "Preserve memory evidence and authority"
+  default_prompt: "Use $governed-memory to verify this memory-backed assertion."
+policy:
+  allow_implicit_invocation: true

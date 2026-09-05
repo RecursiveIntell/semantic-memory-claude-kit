@@ -7,7 +7,7 @@ dependencies:
   tools:
     - type: "mcp"
       value: "semantic_memory"
-      description: "Local semantic-memory MCP server for dedupe, fact writes, and graph links"
+      description: "Local semantic-memory MCP server for witnessed dedupe and governed fact capture"
       transport: "stdio"
 policy:
   allow_implicit_invocation: true
