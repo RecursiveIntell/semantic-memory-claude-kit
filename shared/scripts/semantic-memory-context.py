@@ -34,8 +34,9 @@ COMPLEX = {
 
 def resolve_binary() -> str | None:
     env = os.environ.get("SEMANTIC_MEMORY_MCP_BIN")
-    if env and os.access(os.path.expanduser(env), os.X_OK):
-        return os.path.expanduser(env)
+    if env:
+        candidate = Path(env).expanduser()
+        return str(candidate) if candidate.is_file() and os.access(candidate, os.X_OK) else None
     for candidate in (
         Path.home() / "Coding/Libraries/semantic-memory-mcp/target/release/semantic-memory-mcp",
         Path.home() / ".local/bin/semantic-memory-mcp",
@@ -81,22 +82,21 @@ def rpc_call(tool: str, arguments: dict, timeout: int = 8) -> dict | None:
     if not binary:
         return None
     memdir = memory_dir()
-    Path(memdir).mkdir(parents=True, exist_ok=True)
     reqs = [
         {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"semantic-memory-context","version":"1"}}},
         {"jsonrpc":"2.0","method":"notifications/initialized"},
         {"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":tool,"arguments":arguments}},
     ]
     stdin = "\n".join(json.dumps(x) for x in reqs) + "\n"
-    args = [binary, "--memory-dir", memdir]
-    prof = os.environ.get("SEMANTIC_MEMORY_TOOL_PROFILE", "lean")
-    if prof and binary_supports(binary, "--tool-profile"):
-        args += ["--tool-profile", prof]
-    embedder = os.environ.get("SEMANTIC_MEMORY_EMBEDDER", "candle")
-    if embedder:
-        args += ["--embedder", embedder]
+    args = [str(Path(__file__).resolve().parent / "run-server.sh")]
+    child_env = os.environ.copy()
+    child_env["SEMANTIC_MEMORY_MCP_BIN"] = binary
+    child_env["SEMANTIC_MEMORY_DIR"] = memdir
+    child_env["SEMANTIC_MEMORY_HTTP_PORT"] = "0"
+    child_env["SEMANTIC_MEMORY_MCP_HTTP_PORT"] = "0"
+    child_env.setdefault("SEMANTIC_MEMORY_TOOL_PROFILE", "lean")
     try:
-        proc = subprocess.run(args, input=stdin, text=True, capture_output=True, timeout=timeout, check=False)
+        proc = subprocess.run(args, env=child_env, input=stdin, text=True, capture_output=True, timeout=timeout, check=False)
     except Exception:
         return None
     for line in proc.stdout.splitlines():

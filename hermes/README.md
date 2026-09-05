@@ -1,5 +1,9 @@
 # semantic-memory for Hermes Agent
 
+> September 2026: read the [current stack and upgrade guide](../docs/CURRENT_STACK.md)
+> for revision-pinned sources, explicit settings, governed-memory behavior and
+> unverified native/HTTP integration gates before using older examples below.
+
 > **Tier 0 reference implementation.** Manifest-driven skills, hooks, commands, MCP companions, proof helpers, and a memory-keeper subagent — over `semantic-memory-mcp` + `context-governor` + `claim-ledger`. Installs locally (no marketplace).
 
 [![Tier 0](https://img.shields.io/badge/tier-0-blueviolet?style=for-the-badge)](#tier--scope)

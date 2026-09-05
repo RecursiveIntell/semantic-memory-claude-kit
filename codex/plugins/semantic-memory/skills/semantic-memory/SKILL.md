@@ -79,7 +79,7 @@ Configuration:
 - `SEMANTIC_MEMORY_DIR`: memory store directory, default `~/.local/share/semantic-memory`
 - `SEMANTIC_MEMORY_MCP_BIN`: explicit path to `semantic-memory-mcp`
 - `SEMANTIC_MEMORY_EMBEDDER`: embedder argument, default `candle`
-- `SEMANTIC_MEMORY_HTTP_PORT`: Codex warm HTTP sidecar port, default `1739`; Hermes/Claude may use `1738`
+- `SEMANTIC_MEMORY_HTTP_PORT`: disabled by default (`0`); explicit HTTP configuration requires native authentication and profile support. Use witnessed MCP tools for daily recall.
 - `SEMANTIC_MEMORY_HTTP_URL`: explicit warm HTTP URL for hooks, default `http://127.0.0.1:$SEMANTIC_MEMORY_HTTP_PORT`
 - `SEMANTIC_MEMORY_TOOL_PROFILE`: `lean`, `standard`, or `full`, default `lean`
 - `SEMANTIC_MEMORY_LLM_MODEL`: optional local LLM model for server-side AI features

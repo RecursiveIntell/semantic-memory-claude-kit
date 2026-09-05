@@ -26,8 +26,9 @@ def debug(label: str) -> None:
 
 def resolve_binary() -> str | None:
     env = os.environ.get("SEMANTIC_MEMORY_MCP_BIN")
-    if env and os.access(os.path.expanduser(env), os.X_OK):
-        return os.path.expanduser(env)
+    if env:
+        candidate = Path(env).expanduser()
+        return str(candidate) if candidate.is_file() and os.access(candidate, os.X_OK) else None
     local = Path.home() / ".local/bin/semantic-memory-mcp"
     if local.exists() and os.access(local, os.X_OK):
         return str(local)
@@ -109,7 +110,6 @@ def rpc_call(tool: str, arguments: dict, timeout: int = 8) -> dict | None:
     if not binary:
         return None
     memdir = memory_dir()
-    Path(memdir).mkdir(parents=True, exist_ok=True)
     reqs = [
         {
             "jsonrpc": "2.0",
@@ -130,18 +130,20 @@ def rpc_call(tool: str, arguments: dict, timeout: int = 8) -> dict | None:
         },
     ]
     stdin = "\n".join(json.dumps(item) for item in reqs) + "\n"
-    embedder = os.environ.get("SEMANTIC_MEMORY_EMBEDDER", "candle")
-    tool_profile = os.environ.get("SEMANTIC_MEMORY_TOOL_PROFILE", "lean")
-    base_args = ["--memory-dir", memdir]
-    if tool_profile and binary_supports(binary, "--tool-profile"):
-        base_args.extend(["--tool-profile", tool_profile])
-    commands = [[binary, *base_args]]
-    if embedder:
-        commands.insert(0, [binary, *base_args, "--embedder", embedder])
+    launcher = Path(__file__).resolve().parents[1] / "scripts/run-server.sh"
+    commands = [[str(launcher)]]
+    child_env = os.environ.copy()
+    child_env["SEMANTIC_MEMORY_MCP_BIN"] = binary
+    child_env["SEMANTIC_MEMORY_DIR"] = memdir
+    # Hooks are read-only and must not start additional listeners.
+    child_env["SEMANTIC_MEMORY_HTTP_PORT"] = "0"
+    child_env["SEMANTIC_MEMORY_MCP_HTTP_PORT"] = "0"
+    child_env.setdefault("SEMANTIC_MEMORY_TOOL_PROFILE", "lean")
     for cmd in commands:
         try:
             proc = subprocess.run(
                 cmd,
+                env=child_env,
                 input=stdin,
                 text=True,
                 capture_output=True,

@@ -15,6 +15,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -23,7 +24,13 @@ def get_mcp_tool_list(command: str, args: list[str], timeout: int = 15) -> list[
     try:
         proc = subprocess.run(
             [command] + args,
-            input=json.dumps({"jsonrpc": "2.0", "method": "tools/list", "id": 1}),
+            input="\n".join(json.dumps(message) for message in [
+                {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+                    "protocolVersion": "2024-11-05", "capabilities": {},
+                    "clientInfo": {"name": "kit-tool-surface", "version": "1"}}},
+                {"jsonrpc": "2.0", "method": "notifications/initialized"},
+                {"jsonrpc": "2.0", "method": "tools/list", "id": 2, "params": {}},
+            ]) + "\n",
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -33,7 +40,7 @@ def get_mcp_tool_list(command: str, args: list[str], timeout: int = 15) -> list[
         for line in proc.stdout.strip().split("\n"):
             try:
                 msg = json.loads(line)
-                if "result" in msg and "tools" in msg.get("result", {}):
+                if msg.get("id") == 2 and "tools" in msg.get("result", {}):
                     return msg["result"]["tools"]
             except json.JSONDecodeError:
                 continue
@@ -54,7 +61,8 @@ def get_profile_tools(profile: str, binary_path: str | None = None) -> dict:
             "available": False,
             "error": f"binary not found at {binary}",
         }
-    tools = get_mcp_tool_list(binary, ["--tool-profile", profile, "--memory-dir", "/tmp/sm-gen-docs"])
+    with tempfile.TemporaryDirectory(prefix="kit-tool-surface-") as store:
+        tools = get_mcp_tool_list(binary, ["--tool-profile", profile, "--memory-dir", store, "--embedder", "mock"])
     if tools is None:
         return {
             "tool_count": None,
@@ -91,16 +99,15 @@ def get_context_governor_tools() -> dict:
     binary = shutil.which("context-governor") or os.path.expanduser("~/.cargo/bin/context-governor")
     if not os.path.isfile(binary):
         return {"tool_count": None, "tools": [], "available": False, "error": "binary not found"}
-    commands = [
-        "compact", "store", "expand", "search", "status", "prune", "diff", "boundary-audit",
-        "audit-tool-surface", "audit-compression-boundary", "eval-governed-memory",
-        "eval-rag-leakage", "screen-conflicts", "select-route",
-    ]
-    return {
-        "tool_count": len(commands),
-        "tools": [{"name": c, "description": f"context-governor CLI command: {c}"} for c in commands],
-        "available": True,
-    }
+    try:
+        proc = subprocess.run([binary, "capabilities"], text=True, capture_output=True, timeout=5)
+        data = json.loads(proc.stdout) if proc.returncode == 0 else None
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        data = None
+    return {"tool_count": None, "tools": [], "available": isinstance(data, dict),
+            "capabilities": data,
+            "note": "Native CLI capabilities; no MCP tool count inferred from binary presence."}
+
 
 
 def generate_artifact(out_path: str, sm_binary: str | None = None) -> dict:
@@ -112,7 +119,7 @@ def generate_artifact(out_path: str, sm_binary: str | None = None) -> dict:
         "companions": {},
     }
 
-    for profile in ["lean", "standard", "full", "admin"]:
+    for profile in ["stable", "lean", "standard", "agent", "full"]:
         artifact["profiles"][profile] = get_profile_tools(profile, sm_binary)
 
     artifact["companions"]["claim-ledger"] = get_claim_ledger_tools()

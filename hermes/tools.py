@@ -17,7 +17,7 @@ import sys
 from typing import Any, Sequence
 
 _NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
-_PROFILES = {"lean", "standard", "agent", "full"}
+_PROFILES = {"stable", "lean", "standard", "agent", "full"}
 _TIMEOUT_SECONDS = 180
 
 

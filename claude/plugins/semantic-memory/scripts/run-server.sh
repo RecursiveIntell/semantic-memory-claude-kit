@@ -1,41 +1,6 @@
 #!/usr/bin/env bash
-# Resolve semantic-memory-mcp, then exec the stdio server. Optionally co-hosts
-# the warm HTTP endpoint when SEMANTIC_MEMORY_HTTP_PORT is non-empty/non-zero.
-set -uo pipefail
-
-if [ -n "${SEMANTIC_MEMORY_RELAY_PORT:-}" ]; then
-  exec python3 /home/sikmindz/Coding/Libraries/semantic-memory-mcp/scripts/semantic-memory-mcp-relay.py --port "$SEMANTIC_MEMORY_RELAY_PORT"
-fi
-
-SM_BIN="${SEMANTIC_MEMORY_MCP_BIN:-}"
-[ -z "$SM_BIN" ] && [ -x "$HOME/Coding/Libraries/semantic-memory-mcp/target/release/semantic-memory-mcp" ] && SM_BIN="$HOME/Coding/Libraries/semantic-memory-mcp/target/release/semantic-memory-mcp"
-[ -z "$SM_BIN" ] && [ -x "$HOME/.local/bin/semantic-memory-mcp" ] && SM_BIN="$HOME/.local/bin/semantic-memory-mcp"
-[ -z "$SM_BIN" ] && SM_BIN="$(command -v semantic-memory-mcp 2>/dev/null || true)"
-[ -z "$SM_BIN" ] && [ -x "$HOME/.cargo/bin/semantic-memory-mcp" ] && SM_BIN="$HOME/.cargo/bin/semantic-memory-mcp"
-
-if [ -z "$SM_BIN" ] || [ ! -x "$SM_BIN" ]; then
-  echo "semantic-memory-mcp not found. Install it with: cargo install semantic-memory-mcp" >&2
-  exit 127
-fi
-
-SM_DIR="${SEMANTIC_MEMORY_DIR:-$HOME/.hermes/semantic-memory.db}"
-mkdir -p "$(dirname "$SM_DIR")" 2>/dev/null || true
-SM_EMBEDDER="${SEMANTIC_MEMORY_EMBEDDER:-candle}"
-SM_HTTP_PORT="${SEMANTIC_MEMORY_HTTP_PORT:-0}"
-SM_TOOL_PROFILE="${SEMANTIC_MEMORY_TOOL_PROFILE:-agent}"
-SM_LLM_MODEL="${SEMANTIC_MEMORY_LLM_MODEL:-${LLM_MODEL:-granite4.1:3b}}"
-SM_TURBO_QUANT="${SEMANTIC_MEMORY_TURBO_QUANT:-${SM_TURBO_QUANT:-0}}"
-
-EXTRA_ARGS=()
-HELP="$("$SM_BIN" --help 2>&1 || true)"
-case "$HELP" in *"--tool-profile"*) [ -n "$SM_TOOL_PROFILE" ] && EXTRA_ARGS+=(--tool-profile "$SM_TOOL_PROFILE") ;; esac
-case "$HELP" in *"--http-port"*) [ -n "$SM_HTTP_PORT" ] && [ "$SM_HTTP_PORT" != "0" ] && EXTRA_ARGS+=(--http-port "$SM_HTTP_PORT") ;; esac
-case "$HELP" in *"--llm-model"*) [ -n "$SM_LLM_MODEL" ] && EXTRA_ARGS+=(--llm-model "$SM_LLM_MODEL") ;; esac
-if [ "$SM_TURBO_QUANT" = "1" ] || [ "$SM_TURBO_QUANT" = "true" ]; then
-  case "$HELP" in *"--turbo-quant"*) EXTRA_ARGS+=(--turbo-quant) ;; esac
-fi
-
-if [ -n "$SM_EMBEDDER" ]; then
-  exec "$SM_BIN" --memory-dir "$SM_DIR" --embedder "$SM_EMBEDDER" "${EXTRA_ARGS[@]}" "$@"
-fi
-exec "$SM_BIN" --memory-dir "$SM_DIR" "${EXTRA_ARGS[@]}" "$@"
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export SM_KIT_DEFAULT_DIR="$HOME/.hermes/semantic-memory.db"
+export SM_KIT_DEFAULT_PROFILE="agent"
+exec "$SCRIPT_DIR/semantic-memory-launch.sh" "$@"

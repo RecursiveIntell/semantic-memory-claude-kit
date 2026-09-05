@@ -33,7 +33,9 @@ def fail(label: str, detail: str = "") -> None: record("FAIL", label, detail)
 def resolve_semantic_binary() -> Path | None:
     candidates: list[Path] = []
     env = os.environ.get("SEMANTIC_MEMORY_MCP_BIN")
-    if env: candidates.append(Path(env).expanduser())
+    if env:
+        candidate = Path(env).expanduser()
+        return candidate if candidate.is_file() and os.access(candidate, os.X_OK) else None
     candidates.extend([
         Path.home() / "Coding/Libraries/semantic-memory-mcp/target/release/semantic-memory-mcp",
         Path.home() / ".local/bin/semantic-memory-mcp",
@@ -85,21 +87,27 @@ def http_get(path: str, label: str, timeout: float = 2.0) -> dict | None:
 
 
 def rpc_tools_list(binary: Path) -> bool:
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
     reqs = [
         {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"semantic-memory-agent-kit-doctor","version":"1"}}},
         {"jsonrpc":"2.0","method":"notifications/initialized"},
         {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}},
     ]
     stdin = "\n".join(json.dumps(x) for x in reqs) + "\n"
-    cmd = [str(binary), "--memory-dir", str(MEMORY_DIR), "--embedder", os.environ.get("SEMANTIC_MEMORY_EMBEDDER", "candle")]
-    help_text = binary_help(binary)
+    cmd = [str(Path(__file__).resolve().with_name("run-server.sh"))]
     profile = os.environ.get("SEMANTIC_MEMORY_TOOL_PROFILE", "lean")
-    if "--tool-profile" in help_text and profile: cmd.extend(["--tool-profile", profile])
+    child_env = os.environ.copy()
+    child_env["SEMANTIC_MEMORY_MCP_BIN"] = str(binary)
+    child_env["SEMANTIC_MEMORY_DIR"] = str(MEMORY_DIR)
+    child_env["SEMANTIC_MEMORY_TOOL_PROFILE"] = profile
+    # Probe the selected native configuration without starting duplicate listeners.
+    child_env["SEMANTIC_MEMORY_HTTP_PORT"] = "0"
+    child_env["SEMANTIC_MEMORY_MCP_HTTP_PORT"] = "0"
     try:
-        proc = subprocess.run(cmd, input=stdin, text=True, capture_output=True, timeout=25, check=False)
+        proc = subprocess.run(cmd, env=child_env, input=stdin, text=True, capture_output=True, timeout=25, check=False)
     except Exception as exc:
         fail("semantic-memory MCP tools/list", str(exc)); return False
+    if proc.returncode != 0:
+        fail("semantic-memory MCP tools/list", f"configured launcher exited {proc.returncode}"); return False
     for line in proc.stdout.splitlines():
         try: msg = json.loads(line)
         except Exception: continue
@@ -133,7 +141,10 @@ def rpc_tools_list(binary: Path) -> bool:
                 },
                 "full": {"sm_search_witnessed", "sm_add_fact", "sm_search", "sm_stats"},
             }
-            required = required_by_profile.get(profile, required_by_profile["lean"])
+            required_by_profile["stable"] = {"sm_search", "sm_search_witnessed", "sm_stats", "sm_get_fact"}
+            if profile not in required_by_profile:
+                fail("semantic-memory MCP tools/list", f"unknown configured profile: {profile}"); return False
+            required = required_by_profile[profile]
             missing = sorted(required - names)
             if missing:
                 fail("semantic-memory MCP tools/list", f"profile={profile}; missing " + ", ".join(missing)); return False

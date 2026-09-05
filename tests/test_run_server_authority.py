@@ -22,7 +22,7 @@ class RunServerAuthorityTests(unittest.TestCase):
             binary.write_text(
                 "#!/usr/bin/env sh\n"
                 "if [ \"${1:-}\" = \"--help\" ]; then\n"
-                "  printf '%s\\n' '--tool-profile --http-port --operator-authority-token-file'\n"
+                "  printf '%s\\n' '--memory-dir --embedder --tool-profile --http-port --operator-authority-token-file'\n"
                 "  exit 0\n"
                 "fi\n"
                 "printf '%s\\n' \"$@\" > \"$CAPTURE_ARGS\"\n",

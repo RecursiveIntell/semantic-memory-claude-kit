@@ -1,5 +1,9 @@
 # semantic-memory for Codex CLI
 
+> September 2026: read the [current stack and upgrade guide](../docs/CURRENT_STACK.md)
+> for revision-pinned sources, explicit settings, governed-memory behavior and
+> unverified native/HTTP integration gates before using older examples below.
+
 > **Tier 0 reference implementation.** Session / prompt / PreCompact / Stop hooks, an automatic codebase-ingest hook, 11 prompts, 1 subagent, an icon asset, and script wrappers — over `semantic-memory-mcp` + `context-governor` + `claim-ledger`.
 > Plugin marketplace path: `semantic-memory@semantic-memory-codex-kit`.
 

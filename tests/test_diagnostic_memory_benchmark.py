@@ -68,6 +68,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertEqual(benchmark.OFFICIAL_STALE_MODEL_SMOKE_CASES, 5)
         self.assertEqual(benchmark.OFFICIAL_STALE_MODEL_MAX_SPEND_USD, 10.0)
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_current_official_stale_retrieval_receipts_validate_all_400_cases(self) -> None:
         rows, _ = benchmark.load_official_stale_dataset(OFFICIAL_STALE)
         receipts, source = benchmark.load_official_stale_retrieval_receipts(
@@ -82,6 +83,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertEqual(first["haystack_session"], [[{"role": "user", "content": rows[0]["M_new"]}]])
         self.assertEqual(first["timestamps"], [rows[0]["timestamps"][rows[0]["relevant_session_index"][1]]])
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_retrieval_receipt_rejects_unmeasured_or_unlinked_evidence(self) -> None:
         rows, _ = benchmark.load_official_stale_dataset(OFFICIAL_STALE)
         receipts, _ = benchmark.load_official_stale_retrieval_receipts(
@@ -132,6 +134,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertEqual(aggregate["cost"]["returned_cost_calls"], 1)
         self.assertIsNone(aggregate["accuracy"]["overall"])
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_cli_integrates_measured_model_grade_into_existing_receipt_family(self) -> None:
         fake_grade = {
             "status": "measured",
@@ -164,6 +167,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
             self.assertEqual(receipt["official_stale"]["execution"]["llm_calls"], 1200)
             self.assertFalse(any(item.get("metric") == "official_model_grading" for item in receipt["official_stale"]["not_tested"]))
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_competitor_inventory_and_bounded_stale_split_are_predeclared(self) -> None:
         self.assertEqual(
             benchmark.COMPETITOR_IDS,
@@ -323,6 +327,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
             self.assertEqual(receipt["adapters"]["stale"]["status"], "not_tested")
             self.assertTrue(receipt["not_tested"])
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_official_stale_pin_split_and_equivalent_event_stream(self) -> None:
         rows, source = benchmark.load_official_stale_dataset(OFFICIAL_STALE)
         self.assertEqual(len(rows), 400)
@@ -364,6 +369,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
             "official STALE model grading requires generated responses and the upstream model judge; this no-LLM adapter produced no model responses and made no judge calls",
         )
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_official_stale_ranking_projection_has_fixed_multi_candidate_taxonomy(self) -> None:
         rows, _ = benchmark.load_official_stale_dataset(OFFICIAL_STALE)
         projected = benchmark.project_official_stale_ranking_row(rows[0], 0)
@@ -386,6 +392,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertEqual(benchmark.project_official_stale_ranking_row(rows[100], 100)["split"], "heldout")
         self.assertEqual(projected["ranking_policy"]["state_integrity"], "measured separately from candidate ordering")
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_old_ranking_candidates_are_non_identifiable_from_public_state(self) -> None:
         rows, _ = benchmark.load_official_stale_dataset(OFFICIAL_STALE)
         projected = benchmark.project_official_stale_ranking_row(rows[0], 0)
@@ -397,6 +404,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertGreaterEqual(len(contract["duplicate_target_candidate_ids"]), 2)
         self.assertEqual(set(contract["query_copy_probes"]), {"dim1_query", "dim3_query"})
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_claim_producing_ranking_refuses_non_identifiable_candidates(self) -> None:
         rows, _ = benchmark.load_official_stale_dataset(OFFICIAL_STALE)
         projected = benchmark.project_official_stale_ranking_row(rows[0], 0)
@@ -429,6 +437,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertEqual(aggregate["ranking"]["metrics"]["recall_at_k"]["1"], {"successes": 2, "total": 3, "rate": 0.666667})
         self.assertEqual(aggregate["ranking"]["metrics"]["state_integrity"], {"status": "separate"})
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_official_stale_ranking_cli_reuses_jsonl_and_receipt_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "aggregate.json"
@@ -478,6 +487,7 @@ class DiagnosticMemoryBenchmarkTests(unittest.TestCase):
         self.assertAlmostEqual(benchmark.seconds_to_next_persisted_second(100.99), 0.03)
         self.assertGreater(benchmark.seconds_to_next_persisted_second(100.0), 1.0)
 
+    @unittest.skipUnless(OFFICIAL_STALE.is_file(), "official STALE dataset absent; not benchmark-certified")
     def test_official_stale_cli_writes_five_case_smoke_sidecars(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "aggregate.json"

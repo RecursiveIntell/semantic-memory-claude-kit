@@ -34,7 +34,7 @@ def test_claude_runtime_defaults_use_canonical_durable_stores():
     assert "$HOME/.hermes/semantic-memory.db" in active_runtime
     assert '.hermes" / "context-governor"' in active_runtime or ".hermes/context-governor" in active_runtime
     launcher = (PLUGIN / "scripts/run-server.sh").read_text(encoding="utf-8")
-    assert 'mkdir -p "$(dirname "$SM_DIR")"' in launcher
+    assert 'semantic-memory-launch.sh' in launcher
     assert 'mkdir -p "$SM_DIR"' not in launcher
     for legacy in LEGACY_DURABLE_DEFAULTS:
         assert legacy not in active_runtime

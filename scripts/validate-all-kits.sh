@@ -3,6 +3,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+MODE="${1:---native}"
+case "$MODE" in --static|--native) ;; *) echo "Usage: $0 [--static|--native]" >&2; exit 64 ;; esac
 fail=0
 check() { echo "==> $*"; "$@" || fail=1; }
 
@@ -35,7 +37,12 @@ if command -v claude >/dev/null 2>&1; then
   check claude plugin validate claude/plugins/semantic-memory
 fi
 
-check python3 cursor/scripts/doctor.py
+if [ "$MODE" = "--native" ]; then
+  check python3 cursor/scripts/doctor.py
+else
+  echo "NOT RUN: native binary/installed-host doctor (--native required for runtime proof)"
+fi
+check python3 scripts/sync-kit-assets.py --check
 
 check python3 - <<'PY'
 import json
@@ -68,7 +75,7 @@ print(f"context-governor MCP tools/list: {len(tools)} tools exposed")
 PY
 
 if [ "$fail" -eq 0 ]; then
-  echo "ALL KIT VALIDATION PASSED"
+  echo "KIT VALIDATION PASSED ($MODE)"
 else
   echo "KIT VALIDATION FAILED" >&2
 fi

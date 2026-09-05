@@ -1,7 +1,7 @@
 {
   "name": "semantic-memory",
-  "version": "0.7.2+codex.20260713064626",
-  "description": "Local-first persistent semantic memory for Codex: lean/standard/full sm_* MCP profiles, warm HTTP recall hooks, adaptive routing, codebase ingestion, conversation memory, graph exploration, supersession, and memory curation skills.",
+  "version": "0.8.0",
+  "description": "Local-first semantic-memory integration with discovered tool profiles, governed capture, witnessed recall and native receipt boundaries.",
   "author": {
     "name": "Josh Stevenson",
     "email": "j.stevenson.cs@gmail.com",
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "Semantic Memory",
     "shortDescription": "Persistent local memory, graph recall, and conversation search for Codex",
-    "longDescription": "Semantic Memory gives Codex shared, local-first memory backed by semantic-memory-mcp. It exposes the current semantic-memory tool surface through lean, standard, and full profiles: hybrid search, direct fact reads, namespace enumeration, adaptive routing, graph traversal, fact supersession, lifecycle curation, conversation sessions, setup verification, warm project-scoped recall hooks, and deterministic repository ingestion.",
+    "longDescription": "Connect Codex to semantic-memory-mcp using its discovered stable, lean, standard, agent or full profile. Includes witnessed recall, governed capture guidance, explicit embedding and authority settings, and optional context-governor and claim-ledger companions. Capabilities depend on the installed native build; this kit does not grant runtime authority.",
     "developerName": "Josh Stevenson",
     "category": "Developer Tools",
     "capabilities": [

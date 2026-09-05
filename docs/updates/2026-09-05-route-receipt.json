@@ -1,0 +1,114 @@
+{
+  "schema_version": "recursiveintell-route-receipt/v1",
+  "route_id": "memory-implement",
+  "status": "degraded",
+  "intent": "implement",
+  "domain": "memory",
+  "affected_domains": [
+    "memory",
+    "github"
+  ],
+  "risk": "high",
+  "evidence_impact": "data-integrity",
+  "authority": "external-write",
+  "authorities": [
+    "local-write",
+    "external-write"
+  ],
+  "authorized_targets": [
+    "github:RecursiveIntell/agent-memory-kits"
+  ],
+  "selected_skills": [
+    "audit-repo-hostile",
+    "design-proofed-codex-pass",
+    "run-proofed-code-change",
+    "govern-memory-change"
+  ],
+  "skipped_skills": [],
+  "stages": [
+    {
+      "id": "audit@pre",
+      "status": "passed",
+      "evidence": [
+        "Current source inspected; configuration, receipt and validation drift recorded in plan"
+      ],
+      "receipt": "docs/updates/2026-09-05-receipt.md"
+    },
+    {
+      "id": "plan@bounded",
+      "status": "passed",
+      "evidence": [
+        "Owner-preserving bounded plan and rollback recorded"
+      ],
+      "receipt": "docs/updates/2026-09-05-receipt.md"
+    },
+    {
+      "id": "authority@local",
+      "status": "passed",
+      "evidence": [
+        "User requested GitHub memory-kit updates; isolated clean branch; no live store changes"
+      ],
+      "receipt": "docs/updates/2026-09-05-receipt.md"
+    },
+    {
+      "id": "implement@memory",
+      "status": "degraded",
+      "evidence": [
+        "219 Python tests passed; static package passed; native gates blocked"
+      ],
+      "receipt": "docs/updates/2026-09-05-receipt.md"
+    },
+    {
+      "id": "audit@post",
+      "status": "passed",
+      "evidence": [
+        "Independent audit found AMK-01/02; bounded repair and independent re-verification closed both, final defaults delta checked"
+      ],
+      "receipt": "docs/updates/2026-09-05-receipt.md"
+    }
+  ],
+  "mutations": [
+    {
+      "stage": "implement@memory",
+      "authority": "local-write",
+      "action": "Update kit wiring, skills, source guidance and regression gates; bounded follow-up closes AMK-01/02",
+      "target": "github:RecursiveIntell/agent-memory-kits"
+    }
+  ],
+  "validation": [
+    {
+      "command": "python3 -m pytest -q -rs",
+      "exit_code": 0,
+      "passed": 219,
+      "skipped": 19,
+      "subtests_passed": 17
+    },
+    {
+      "command": "./scripts/validate-all-kits.sh --static",
+      "exit_code": 0
+    },
+    {
+      "command": "./scripts/validate-all-kits.sh --native",
+      "exit_code": 1,
+      "reason": "Native binaries absent"
+    },
+    {
+      "command": "independent bounded audit and final-delta tests",
+      "status": "passed",
+      "closed_findings": [
+        "AMK-01",
+        "AMK-02"
+      ]
+    }
+  ],
+  "blocked_gates": [
+    "Native build and installed-host validation unavailable",
+    "External STALE/Sleeper benchmark fixtures absent"
+  ],
+  "remaining_delta": [
+    "No source repair identified in bounded final audit",
+    "Operational proof of installed hosts, V2 recovery and devices is unverified"
+  ],
+  "next_gate": "review PR and run native validation on configured host",
+  "follow_up_receipt": "2026-09-05-independent-audit.json (failed initial audit retained; fixes independently reverified)"
+}
